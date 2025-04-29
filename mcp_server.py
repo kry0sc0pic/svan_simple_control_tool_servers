@@ -11,8 +11,10 @@ if SIM:
 else:
     SVAN_BASE = "http://10.42.4.9:8888"
 
+
 def constrain_value(value, minimum: float = -1.0, maximum: float = 1.0):
     return max(minimum, min(value, maximum))
+
 
 @mcp.tool()
 def set_operation_mode(mode: int):
@@ -23,31 +25,28 @@ def set_operation_mode(mode: int):
             AVAILABLE MODES:
                 - 1 (STOP)
                 - 2 (TWIRL)
-                - 3 (PUSH UPS)
+                - 3 (PUSH UP)
     """
     print(f"Receieved mode: {mode}")
     if 1 <= mode <= 4:
-        requests.post(SVAN_BASE + "/mode", json={
-            'operation_mode': mode,
-        })
-
+        requests.post(SVAN_BASE + "/mode", json={'operation_mode': mode})
     else:
         print("Invalid Mode")
 
 
 @mcp.tool()
-def set_movement(vel_x: float, vel_y: float, duration: float = 5.0):
+def set_movement(x_vel: float, y_vel: float, duration=5):
     """Set movement velocity for the SVAN quadruped robot
 
     Args:
-        vel_x: float velocity in x-axis (-1.0 to 1.0). positive x-axis is to the right side of the robot
-        vel_y: float velocity in y-axis (-1.0 to 1.0). positive y-axis is to the front of the robot.
-        duration: float time for execution of movement in seconds. Default time is 5.0 seconds
+        x_vel: float velocity in x-axis (-1.0 to 1.0). positive x-axis is to the right side of the robot
+        y_vel: float velocity in y-axis (-1.0 to 1.0). positive y-axis is to the front of the robot.
+        duration: float time for execution of movement in seconds. default to 5 seconds
     """
     set_operation_mode(mode=4)  # switch to trot
     requests.post(SVAN_BASE + "/movement", json={
-        "vel_x": constrain_value(vel_x),
-        "vel_y": constrain_value(vel_y)
+        "vel_x": constrain_value(x_vel),
+        "vel_y": constrain_value(y_vel),
     })
     time.sleep(duration)
     requests.post(SVAN_BASE + "/movement", json={
@@ -65,7 +64,9 @@ def set_roll(roll: float = 0.0):
     Args:
         roll: float value (-1.0 to 1.0) - positive roll is towards the right
     """
-    requests.post(SVAN_BASE + "/roll", json={"roll": constrain_value(roll),})
+    requests.post(SVAN_BASE + "/roll", json={
+        "roll": constrain_value(roll),
+    })
 
 
 @mcp.tool()
@@ -75,7 +76,9 @@ def set_pitch(pitch: float = 0.0):
     Args:
         pitch: float value (-1.0 to 1.0) - positive pitch is forwards.
     """
-    requests.post(SVAN_BASE + "/pitch", json={"pitch": constrain_value(pitch)})
+    requests.post(SVAN_BASE + "/pitch", json={
+        "pitch": constrain_value(pitch),
+    })
 
 
 @mcp.tool()
@@ -88,6 +91,5 @@ def set_yaw(yaw: int = 2):
             1 - YAW RIGHT
             2 - NO YAW
     """
-    if yaw not in [0, 1, 2]:
-        return
-    requests.post(SVAN_BASE + "/yaw", json={"yaw": yaw})
+    if yaw in [0, 1, 2]:
+        requests.post(SVAN_BASE + "/yaw", json={"yaw": yaw})
